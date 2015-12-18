@@ -9,18 +9,20 @@ output:
 
 
 ## Loading and preprocessing the data
-```{r cache=TRUE}
+
+```r
 library(dplyr) ##using for summary parts later
 library(ggplot2) ##using for plot graphs later
 library(chron) ##using for determine weekend or weekday
 ##read the csv file into dataset
-activity <- read.csv("activity.csv")
+activity <- read.csv("figures/activity.csv")
 activity <- tbl_df(activity)
 ```
 
 ## What is mean total number of steps taken per day?
 ###1. Calculate the total number of steps taken per day
-```{r cache=TRUE}
+
+```r
 ##Because all missing values are ignored, some of days may not have any data.
 ##Therefore, I filter the total of steps, which are greater than 0.
 group_day <- group_by(activity, date) %>%
@@ -28,19 +30,47 @@ group_day <- group_by(activity, date) %>%
   filter(total > 0)
 print(group_day)
 ```
+
+```
+## Source: local data frame [53 x 2]
+## 
+##          date total
+##        (fctr) (int)
+## 1  2012-10-02   126
+## 2  2012-10-03 11352
+## 3  2012-10-04 12116
+## 4  2012-10-05 13294
+## 5  2012-10-06 15420
+## 6  2012-10-07 11015
+## 7  2012-10-09 12811
+## 8  2012-10-10  9900
+## 9  2012-10-11 10304
+## 10 2012-10-12 17382
+## ..        ...   ...
+```
 ###2. Make a histogram of the total number of steps taken each day
-```{r cache=TRUE}
+
+```r
 hist(group_day$total, main = "Histogram of total number of steps taken each day", xlab = "Total numer of steps")
 ```
 
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+
 ###3. Calculate and report the mean and median of the total number of steps taken per day.
-```{r cache=TRUE}
+
+```r
 summary(group_day$total)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##      41    8841   10760   10770   13290   21190
 ```
 
 ## What is the average daily activity pattern?
 ###1. Make a time series plot
-```{r cache=TRUE}
+
+```r
 ##Group by interval, calculate mean of steps, ignore all missing values.
 ##similarity, only get the result greater than 0
 group_interval <- group_by(activity, interval) %>%
@@ -50,31 +80,71 @@ group_interval <- group_by(activity, interval) %>%
 plot(x = group_interval$interval, y = group_interval$average, type = "l", main = "Time series plot of the 5-minute interval", ylab = "Average of step", xlab = "Interval of 5-minute")
 ```
 
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
+
 ###2. Indicating the peak of steps across all intervals
-```{r cache=TRUE}
+
+```r
 ##figure out the maximum of average steps across all intervals
 max(group_interval$average)
+```
+
+```
+## [1] 206.1698
+```
+
+```r
 ##get the interval along with the average steps
 arrange(group_interval, desc(average)) %>%
   slice(1)
 ```
 
+```
+## Source: local data frame [1 x 2]
+## 
+##   interval  average
+##      (int)    (dbl)
+## 1      835 206.1698
+```
+
 ## Imputing missing values
 ###1. Calculate and report the total number of missing values in the dataset
 ####1.1. Total missing value in activity dataset
-```{r cache=TRUE}
+
+```r
 ##calculate all missing value in the datasets
 missing_values <- filter(activity, is.na(steps))
 nrow(missing_values)
 ```
+
+```
+## [1] 2304
+```
 ####1.2. Total missing value per day
-```{r cache=TRUE}
+
+```r
 mutate(missing_values, isMissing = is.na(steps)) %>%
   group_by(date) %>%
   summarise(Total.Missing = sum(isMissing))
 ```
+
+```
+## Source: local data frame [8 x 2]
+## 
+##         date Total.Missing
+##       (fctr)         (int)
+## 1 2012-10-01           288
+## 2 2012-10-08           288
+## 3 2012-11-01           288
+## 4 2012-11-04           288
+## 5 2012-11-09           288
+## 6 2012-11-10           288
+## 7 2012-11-14           288
+## 8 2012-11-30           288
+```
 ###2 & 3. Filling the missing values
-```{r cache=TRUE}
+
+```r
 ######If there is no data of steps for any intervals, 
 ######I'll take the average of steps of the intervals. 
 ######In another words, missing value of steps of certain interval 
@@ -102,15 +172,27 @@ activity$filled_steps <- filled_activity$steps
 ```
 ###4. Make histogram and report mean and median of new filled dataset
 ####4.1 Make histogram
-```{r cache=TRUE}
+
+```r
 filled_group_day <- group_by(activity, date) %>%
   summarise(total = sum(filled_steps))
 hist(filled_group_day$total, main = "Histogram of new total number of steps taken each day", xlab = "Total numer of new steps")
 ```
 
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10-1.png) 
+
 ####4.2 Report summary
-```{r cache=TRUE}
+
+```r
 summary(filled_group_day$total)
+```
+
+```
+##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+##    21.87   727.70 10310.00 10770.00 15020.00 50820.00
+```
+
+```r
 ####AS we can see the huge difference between the new histogram and the old histograms
 ####as well asl the difference between the old summary and the new summary.
 ####For the histogram, the peak of the histogram shifts from 10000-15000 steps to 0-10000steps.
@@ -119,13 +201,15 @@ summary(filled_group_day$total)
 ```
 ## Are there differences in activity patterns between weekdays and weekends?
 ###1. Create a new factor variable to indicate weekend or weekday
-```{r cache=TRUE}
+
+```r
 new_activity <- mutate(activity, day=ifelse(is.weekend(as.Date(date)), "weekend", "weekday")) %>%
   group_by(day, interval) %>%
   summarise(average = mean(filled_steps))
 ```
 ###2. Make a time series of the average steps of each intervals per weekday and weekend
-```{r cache=TRUE}
+
+```r
 ggg <- ggplot(data = new_activity, aes(interval, average),  fill=day) +
   geom_line(stat = "identity") +
   theme_bw() + guides(fill=FALSE)+
@@ -134,3 +218,5 @@ ggg <- ggplot(data = new_activity, aes(interval, average),  fill=day) +
   labs(title=expression("Time series plot of the 5-minute interval classied by day of week"))
 print(ggg)
 ```
+
+![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13-1.png) 
