@@ -1,15 +1,23 @@
 ---
+<<<<<<< HEAD
 title: 'Reproducible Research: Peer Assessment 1'
 output:
   html_document:
     keep_md: yes
   pdf_document: default
   word_document: default
+=======
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+>>>>>>> d5190d2b5da97b979ed910b663c3699f44842748
 ---
 
 
 ## Loading and preprocessing the data
 
+<<<<<<< HEAD
 ```r
 library(dplyr) ##using for summary parts later
 library(ggplot2) ##using for plot graphs later
@@ -220,3 +228,20 @@ print(ggg)
 ```
 
 ![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13-1.png) 
+=======
+
+
+## What is mean total number of steps taken per day?
+
+
+
+## What is the average daily activity pattern?
+
+
+
+## Imputing missing values
+
+
+
+## Are there differences in activity patterns between weekdays and weekends?
+>>>>>>> d5190d2b5da97b979ed910b663c3699f44842748
